@@ -33,6 +33,7 @@ export class AuthService {
             email: user.email
         }
 
+        console.log("JWT_SECRET présent :", !!process.env.JWT_SECRET);
         const accessToken = this.jwtService.sign(payload)
 
         return {
