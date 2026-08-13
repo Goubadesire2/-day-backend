@@ -1,0 +1,9 @@
+### Créer un utilisateur
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "name": "Desire Gouba",
+  "email": "goubadesire0@gmail.com",
+  "password": "goubadesire2001"
+}
