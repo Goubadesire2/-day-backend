@@ -12,7 +12,7 @@ import {JwtStrategy} from "./strategies/jwt.strategy";
     ConfigModule.forRoot(),
     PrismaModule,
     UserModule,
-    AuthModule,
+    
       JwtModule.register({
         secret: process.env.JWT_SECRET,
         signOptions: {
@@ -21,6 +21,6 @@ import {JwtStrategy} from "./strategies/jwt.strategy";
       })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy]
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

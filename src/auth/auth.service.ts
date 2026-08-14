@@ -8,36 +8,52 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
     constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService,) {}
 
-    async login(loginDto: LoginDto){
-        const user = await this.prisma.user.findUnique({
-            where: {
-                email: loginDto.email
-            }
-        })
+    async login(loginDto: LoginDto) {
+  try {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: loginDto.email,
+      },
+    });
 
-        if(!user){
-            throw new UnauthorizedException("Email ou mot de passe incorrect")
-        }
-
-        const passwordValid = await bcrypt.compare(
-            loginDto.password,
-            user.password
-        )
-
-        if(!passwordValid){
-            throw new UnauthorizedException("Email ou mot de passe incorrect")
-        }
-
-        const payload = {
-            sub: user.id,
-            email: user.email
-        }
-
-        console.log("JWT_SECRET présent :", !!process.env.JWT_SECRET);
-        const accessToken = this.jwtService.sign(payload)
-
-        return {
-            access_Token: accessToken
-        }
+    if (!user) {
+      throw new UnauthorizedException(
+        "Email ou mot de passe incorrect",
+      );
     }
+
+    const passwordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
+
+    if (!passwordValid) {
+      throw new UnauthorizedException(
+        "Email ou mot de passe incorrect",
+      );
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    console.log("Utilisateur trouvé :", user.email);
+    console.log(
+      "JWT_SECRET présent :",
+      !!process.env.JWT_SECRET,
+    );
+
+    const accessToken = this.jwtService.sign(payload);
+
+    console.log("JWT généré :", !!accessToken);
+
+    return {
+      access_Token: accessToken,
+    };
+  } catch (error) {
+    console.error("ERREUR LOGIN :", error);
+    throw error;
+  }
+}
 }

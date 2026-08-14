@@ -11,7 +11,7 @@ import { AuthModule } from './auth/auth.module';
       //ignoreEnvFile: true,
     }),
     UserModule,
-    AuthModule
+    AuthModule,
 ],
   controllers: [AppController],
   providers: [AppService],
