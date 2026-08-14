@@ -8,52 +8,63 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
     constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService,) {}
 
-    async login(loginDto: LoginDto) {
-  try {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: loginDto.email,
-      },
-    });
+   async login(loginDto: LoginDto) {
+    console.log("=== LOGIN START ===");
+    console.log("Email reçu :", loginDto.email);
 
-    if (!user) {
-      throw new UnauthorizedException(
-        "Email ou mot de passe incorrect",
-      );
+    try {
+        console.log("1. Recherche utilisateur...");
+
+        const user = await this.prisma.user.findUnique({
+            where: {
+                email: loginDto.email,
+            },
+        });
+
+        console.log("2. Résultat Prisma :", !!user);
+
+        if (!user) {
+            throw new UnauthorizedException(
+                "Email ou mot de passe incorrect",
+            );
+        }
+
+        console.log("3. Utilisateur trouvé :", user.email);
+
+        console.log("4. Vérification bcrypt...");
+
+        const passwordValid = await bcrypt.compare(
+            loginDto.password,
+            user.password,
+        );
+
+        console.log("5. Bcrypt terminé :", passwordValid);
+
+        if (!passwordValid) {
+            throw new UnauthorizedException(
+                "Email ou mot de passe incorrect",
+            );
+        }
+
+        console.log("6. Création du JWT...");
+
+        const payload = {
+            sub: user.id,
+            email: user.email,
+        };
+
+        const accessToken = this.jwtService.sign(payload);
+
+        console.log("7. JWT créé");
+
+        return {
+            access_Token: accessToken,
+        };
+    } catch (error) {
+        console.error("=== ERREUR LOGIN ===");
+        console.error(error);
+
+        throw error;
     }
-
-    const passwordValid = await bcrypt.compare(
-      loginDto.password,
-      user.password,
-    );
-
-    if (!passwordValid) {
-      throw new UnauthorizedException(
-        "Email ou mot de passe incorrect",
-      );
-    }
-
-    const payload = {
-      sub: user.id,
-      email: user.email,
-    };
-
-    console.log("Utilisateur trouvé :", user.email);
-    console.log(
-      "JWT_SECRET présent :",
-      !!process.env.JWT_SECRET,
-    );
-
-    const accessToken = this.jwtService.sign(payload);
-
-    console.log("JWT généré :", !!accessToken);
-
-    return {
-      access_Token: accessToken,
-    };
-  } catch (error) {
-    console.error("ERREUR LOGIN :", error);
-    throw error;
-  }
 }
 }
